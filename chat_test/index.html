@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <title>Socket.IOの練習</title>
+    </head>
+    <body>
+        <form id="myForm">
+            <input type=="text" id="msg">
+            <input type="submit" value="Send!">
+        </form>
+        <ul id="logs">
+        </ul>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            $(function() {
+                var socket = io.connect();
+                // emit: イベントを発信している
+                // on: イベントを待ち受けている
+                $('#myForm').submit(function(e) {
+                    e.preventDefault();
+                    socket.emit('emit_from_client', $('#msg').val());
+                    $('#msg').val("").focus();
+                });
+
+                socket.on('emit_from_server', function(data) {
+                    $('#logs').append($('<li>').text(data));
+                });
+            }) 
+        </script>
+    </body>
+</html>
