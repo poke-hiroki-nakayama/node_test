@@ -12,6 +12,12 @@ nvm alias default v$node_version && \
 echo "node $node_version installed.."
 
 echo -e 'if [[ -s /home/vagrant/.nvm/nvm.sh ]] ; then source /home/vagrant/.nvm/nvm.sh ; fi' >> /home/vagrant/.bash_profile
+# npm global module install path add
+export NODE_PATH=`npm root -g`
+echo -e 'export NODE_PATH=`npm root -g`' >> /home/vagrant/.bash_profile
+
+# socket.io install command
+npm install socket.io -g
 
 ## iptables off 
 sudo service iptables stop && \
