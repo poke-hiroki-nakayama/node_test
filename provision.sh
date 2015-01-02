@@ -19,7 +19,18 @@ echo -e 'export NODE_PATH=`npm root -g`' >> /home/vagrant/.bash_profile
 # socket.io install command
 npm install socket.io -g
 
+# node-redis install command
+npm install redis -g
+
+# redis install
+sudo rpm -iv http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+sudo yum --enablerepo=epel -y install redis
+
 ## iptables off 
 sudo service iptables stop && \
 sudo chkconfig iptables off && \
 echo -e 'port opened..'
+## redis on
+sudo service redis start && \
+sudo chkconfig redis on && \
+echo -e 'redis started..'
