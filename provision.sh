@@ -1,6 +1,6 @@
 node_version="0.10.33"
  
-#sudo yum -y install git
+sudo yum -y install git
 ## nvm insall command
 git clone git://github.com/creationix/nvm.git /home/vagrant/.nvm && \
 chown vagrant:vagrant -R /home/vagrant/.nvm && \
@@ -23,7 +23,7 @@ npm install socket.io -g
 npm install redis -g
 
 # redis install
-sudo rpm -iv http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+sudo rpm -ivh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
 sudo yum --enablerepo=epel -y install redis
 
 ## iptables off 
