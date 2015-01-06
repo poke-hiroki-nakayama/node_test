@@ -21,25 +21,6 @@ redis_client.on("error", function (err) {
     console.log("Error " + err);
 });
 
-/**
- * ランキングタイプ
- */
-function getRankingData(ranking_key) {
-    // TODO ランキングデータの作成
-    var min = 0;
-    var max = 10;
-    var response_data = null;
-    // TODO redisからソート済みセットを取得する
-    var arg1 = [ ranking_key, max, min, 'WITHSCORES'];
-    console.log('arg1=' + arg1);
-    redis_client.zrevrange(arg1, function (err, response) {
-        if (err) {
-            throw err;
-        }
-        console.log('zrevrange :' + response);
-        response_data = response;
-    });
-}
 
 /**
  * ランキング結果表示(HTTP)
@@ -53,15 +34,40 @@ function renderRankJson(_req, _res) {
     if(ranking_key == null) {
         // ランキングキーが指定されていない場合はエラー
         responseError(_res,500);
+        return;
     }
-    // TODO ランキングの内容をredisに問い合わせて取得
-    var ranking_data_array = getRankingData(ranking_key);
+    // TODO ランキング取得範囲を設定
+    var offset = Number(query_params_array.offset);
+    var limit = Number(query_params_array.limit);
+    if(offset == null || isNaN(offset)) {
+        // デフォルト値
+        offset = 0;
+    }
+    if(limit == null || isNaN(limit)) {
+        // デフォルト値
+        limit = 4;
+    }
 
-    // TODO 取得したランキングデータをJSON形式に変更
-    var json_data = JSON.stringify(test_array);
-    _res.writeHead(200, {'Content-Type': 'application/json; charset=utf-8'});
-    _res.write(json_data);
-    _res.end();
+    // ランキングの内容をredisに問い合わせて取得
+    var response_data = null;
+    var arg1 = [ ranking_key, offset, offset+limit-1, 'WITHSCORES' ];
+    redis_client.zrevrange(arg1, function (err, response) {
+        if (err) {
+            throw err;
+        }
+
+        // 取得したデータを整形
+        var response_rank_data = [];
+        for (var i=0,rank_no=offset+1; i<response.length; i=i+2,rank_no++) {
+            response_rank_data.push({"rank":rank_no, "name":response[i], "score":response[i+1]});
+        }
+
+        // 取得したランキングデータをJSON形式に変更
+        var json_data = JSON.stringify(response_rank_data);
+        _res.writeHead(200, {'Content-Type': 'application/json; charset=utf-8'});
+        _res.write(json_data);
+        _res.end();
+    });
 }
 
 /**
@@ -77,7 +83,6 @@ function responseError(_res, _errorCode) {
  * HTTPリクエストが来た場合のイベントメソッド
  */
 server.on('request', function(req, res) {
-    console.log(url_mod.parse(req.url,true));
     // アクセスURL部分を取得
     var request_pathname = url_mod.parse(req.url,true).pathname;
     // アクセスURLによって処理を分ける
