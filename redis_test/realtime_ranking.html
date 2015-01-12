@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <title>Socket.IOの練習</title>
+    </head>
+    <body style="font-size: 60px;">
+        <table id="ranking_table" border="5">
+            <tr>
+                <td>ランキング取得中</td>
+            </tr>
+        </table>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            var offset = 0;
+            var limit = 4;
+
+            $(function() {
+                var socket = io.connect();
+
+                // サーバーからのPUSH受け取り
+                socket.on('emit_push_ranking', function(rank_data) {
+                    // TODO ランキングテーブル内のHTMLを空にする
+                    $('#ranking_table').empty();
+                    // TODO ランキングテーブル内のHTMLにランキング情報を追加する
+                    for(i=0; i<rank_data.length; i++) {
+                        $('#ranking_table').append($('<tr>'));
+                        $('#ranking_table tr:last').append('<td>');
+                        $('#ranking_table tr:last td:last').append(rank_data[i].rank+'位');
+                        $('#ranking_table tr:last').append('<td>');
+                        $('#ranking_table tr:last td:last').append(rank_data[i].name);
+                        $('#ranking_table tr:last').append('<td>');
+                        $('#ranking_table tr:last td:last').append(rank_data[i].score);
+
+                    }
+                });
+
+                // サーバーからランキング更新通知を受け取り
+                socket.on('emit_ranking_update', function(data) {
+                    console.log(data + ' ランキング更新通知');
+                    socket.emit('emit_ranking_request','nakayama', offset, limit);
+                });
+
+                // サーバーへのランキング情報リクエスト処理発光
+                socket.emit('emit_ranking_request','nakayama', offset, limit);
+            }) 
+        </script>
+    </body>
+</html>

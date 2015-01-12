@@ -1,0 +1,73 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+
+# exec script
+$script = <<SCRIPT
+echo 'Start ShellScript'
+
+sudo cp -p /usr/share/zoneinfo/Japan /etc/localtime
+SCRIPT
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.box_url = "https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box"
+
+  config.vm.box = "dummy"
+
+  # sync directory setting
+  config.vm.synced_folder "./", "/home/ec2-user/vagrant", disabled: true
+  config.vm.provider :aws do |aws, override|
+      # access key
+      aws.access_key_id = ENV['AWS_ACCESS_KEY_ID']
+      # secret_access_key
+      aws.secret_access_key = ENV['AWS_SECRET_ACCESS_KEY']
+      # key name
+      aws.keypair_name = 'nakayama_ec2'
+      # aws ec2 instance type
+      #aws.instance_type = "t2.micro"
+      aws.instance_type = "t1.micro"
+      # aws region (tokyo is ap-northeast-1)
+      aws.region = "ap-northeast-1"
+      # availability zone
+      aws.availability_zone = "ap-northeast-1c"
+      # use ami type
+      aws.ami = "ami-c9562fc8"
+      # security groups 
+      aws.security_groups = ['test_security_group']
+      # tags
+      aws.tags = {
+          'Name' => 'web-server',
+          'Description' => 'description'
+      }
+      # user data
+      aws.user_data = "#!/bin/sh\nsed -i 's/^.*requiretty/#Defaults requiretty/' /etc/sudoers\n"
+      # EBS
+      aws.block_device_mapping = [
+          # device name
+          'DeviceName' => "/dev/sda1",
+          # Name
+          'VirtualName' => "v1",
+          # volume size
+          'Ebs.VolumeSize' => 10,
+          # is terminate delete
+          'Ebs.DeleteOnTermination' => true,
+          # EBS type
+          'Ebs.VolumeType' => 'standard',
+      ]
+
+      # ssh user name
+      override.ssh.username = "ec2-user"
+      # ssh key path
+      override.ssh.private_key_path = "~/.ssh/nakayama_ec2.pem"
+  end
+
+  config.vm.provision "shell", inline: $script
+
+  #config.vm.network "private_network", ip: "192.168.33.10"
+
+  #config.vm.provision :shell, :path => "provision.sh"
+
+  
+end
