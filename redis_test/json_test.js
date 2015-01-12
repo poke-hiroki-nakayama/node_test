@@ -11,9 +11,6 @@ var socket_io = socket_io_mod.listen(server)
 var redis_client = redis.createClient();
 var host = '192.168.33.10';
 var port = 1337;
-// TODO ejsテンプレートの読み込み(サンプルなので不要なら削除)
-var docRoot = '/vagrant/public_html'
-var template = fs.readFileSync(docRoot + '/bbs.ejs', 'utf-8');
 
 /**
  * redisクライアントエラーイベント
@@ -188,7 +185,7 @@ function handler(req, res) {
         // HTTP用のJSONランキングデータ取得処理
         renderRankJson(req, res);
     } else if (request_pathname == '/get_rank_html_websocket') {
-        // TODO socketioを使用したHTML形式のリアルタイムランキング
+        // socketioを使用したHTML形式のリアルタイムランキング
         renderRankHtmlSocket(req, res);
     } else if (request_pathname == '/set_rank_http') {
         // HTTP用のランキング追加処理を実装
