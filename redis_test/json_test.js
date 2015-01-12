@@ -235,6 +235,6 @@ socket_io.sockets.on('connection', function(socket) {
 });
 
 // 指定ホスト名と指定ポートでコネクションの受け入れ開始
-server.listen(port, host);
+server.listen(port);
 console.log("server listening ...");
 
